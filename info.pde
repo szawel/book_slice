@@ -5,7 +5,7 @@ void info_top(){
 	textSize(12);
 	fill(0);
 	noSmooth();
-	text(" i - info",20,20);
+	// text(" i - info",20,20);
 
 
 }
