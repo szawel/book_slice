@@ -4,22 +4,17 @@
 
 import geomerative.*;
 import controlP5.*;
+import java.util.*;
 
 //	[ declare class ] 
 
-RShape grp;							//	declare class to  import *.svg							
-RPoint[][] pointPaths;	//	declare class array to store point coordinate
-Line slider;						//	declare class draw and stor slider line
-Line constract[];				//	declare class draw and stor importet line
+RShape load_shape;		//	declare class form geomerative external libery to import *.svg
 
-ControlP5 cp5;
-
+//	declare class
 Gui gui;
 
 
-
-//	[ declare variables ] 
-
+//	declare variables 
 //	zmienne przesuwania i skalownaia przestrzenią roboczą
 float zoom;
 PVector offset;
@@ -27,51 +22,52 @@ PVector poffset;
 PVector mouse;
 boolean drag = false;
 
-// zmienne 
-
 float shape_cut_width  = 200;
-float shape_cut_height  = 200;
+float shape_cut_height  = 500;
 int page_nr = 200;
 float page_clip = 0;
 
+// 
+ArrayList<Float> intersection;
 
 void setup(){
 
-	// GUI CP5
+	size(displayWidth,displayHeight);
+	if (frame != null) {
+		frame.setResizable(true);
+  }
+
+// gui
 	noStroke();
 	cp5 = new ControlP5(this);
 	gui = new Gui();
 
-	size(displayWidth,displayHeight);
-	
-		
-
 // opcje biblioteki geomerative / init libery / ignor style / poigon interpretation / file to import
 	RG.init(this);
-	RG.ignoreStyles(false);
 	RG.setPolygonizer(RG.ADAPTATIVE);
-	grp = RG.loadShape("shape.svg");
-
-	pointPaths = grp.getPointsInPaths();
-
-	constract = new Line[pointPaths.length];
-
-
+	load_shape = RG.loadShape("shape.svg");
+	RG.ignoreStyles();
 
 // init workscpace setup 
 	zoom = 1.0;
 	offset = new PVector((displayWidth-250)/2,500);
 	poffset = new PVector(0, 0);
+
 }
 
 
 void draw(){
 	background(255);
 
-	float clip_pos = lerp(0,((shape_cut_width/page_nr)*page_nr),page_clip);
+	noFill();
+	stroke(0);
+	strokeWeight(0.5);
+	smooth();
 
-	slider = new Line( new PVector(clip_pos,0), new PVector(clip_pos,shape_cut_height));
-	slider.draw();
+
+	intersection = new ArrayList<Float>();			// zaincjalizuj pust 'ArrayList'
+
+	float clip_pos = lerp(0,((shape_cut_width/page_nr)*page_nr),page_clip);
 
 
 //	sklalowanie przesuwanie przestrzenią roboczą [ START ]
@@ -79,29 +75,21 @@ void draw(){
 	scale(zoom);
 	translate(offset.x/zoom, offset.y/zoom);
 
-//	opcje podgladu 
-	strokeWeight(0.5);
-	stroke(0);
-	textSize(5);
-	smooth();
+// display shape | imported *.svg
+	RG.shape(load_shape);
 
+	RShape cuttingLine = RG.getLine(clip_pos,0,clip_pos, shape_cut_height);
+	RG.shape(cuttingLine);
 
-	for(int i = 0; i < pointPaths.length; i++){
-		constract[i] = new Line ( new PVector(pointPaths[i][0].x,pointPaths[i][0].y), new PVector(pointPaths[i][1].x,pointPaths[i][1].y));
-		constract[i].draw();
-	}
+	RPoint[] ps = load_shape.getIntersections(cuttingLine);
+		if (ps != null) {
+			for (int i=0; i<ps.length; i++) {
+				ellipse(ps[i].x, ps[i].y, 5, 5);
+				intersection.add(ps[i].y);
+    }
+  }
 
-	noFill();
-	for( int i = 0; i < pointPaths.length; i++){
-		PVector intersection = slider.intersects_at(constract[i]);
-			if( intersection != null){
-				ellipse(intersection.x, intersection.y, 5, 5);
-				point(intersection.x, intersection.y);
-				text(i,intersection.x+10, intersection.y);
-			 }
-	}
-
-
+	
 	border();
 	popMatrix();
 // sklalowanie przesuwanie przestrzenią roboczą [ STOP ]
