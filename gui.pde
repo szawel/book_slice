@@ -30,7 +30,7 @@ class Gui{
     .setSize(100,14)
     .setScrollSensitivity(1000)
     .setDirection(Controller.HORIZONTAL)
-     ;
+    ;
 
   cp5.addSlider("page_clip")
     .setCaptionLabel("nr_line")
@@ -38,5 +38,19 @@ class Gui{
     .setSize(210,15)
     .setRange(0,1)
 		;
+
+  cp5.addNumberbox("page_width")
+    .setPosition(400,20)
+    .setSize(100,14)
+    .setScrollSensitivity(1000)
+    .setDirection(Controller.HORIZONTAL)
+    ;
+
+  cp5.addNumberbox("page_hight")
+    .setPosition(400,50)
+    .setSize(100,14)
+    .setScrollSensitivity(1000)
+    .setDirection(Controller.HORIZONTAL)
+    ;
 	}
 }
