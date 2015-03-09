@@ -36,8 +36,18 @@ int page_hight = 400;
 float pat_margin = 10;
 
 Cut_point_Test cut_point_Test;
+Rmap rmap;
 
 Float cut_point[];
+
+PVector con_top[];
+PVector con_middle[];
+PVector con_bottom[];
+
+
+PVector line_top[];
+PVector line_middle[];
+PVector line_bottom[];
 
 // 
 ArrayList<Float> intersection;
@@ -84,7 +94,6 @@ void draw(){
 	stroke(0);
 	strokeWeight(0.5);
 	smooth();
-
 
 
 	intersection = new ArrayList<Float>();			// zaincjalizuj pust 'ArrayList'
@@ -152,11 +161,78 @@ void draw(){
  middle = new Middle(part_middle,700,color(0,255,0));
  middle = new Middle(part_bottom,700,color(0,0,255));
 
+ con_top = new PVector[2];
+ con_top[0] = new PVector(0,0);
+ con_top[1] = new PVector(page_width,0);
 
-	
+ con_middle = new PVector[2];
+ con_middle[0] = new PVector(page_width,0);
+ con_middle[1] = new PVector(page_width,page_hight);
+
+ con_bottom = new PVector[2];
+ con_bottom[0] = new PVector(page_width,page_hight);
+ con_bottom[1] = new PVector(0,page_hight);
+
+ line_top = new PVector[part_top.size()];
+ line_middle = new PVector[part_middle.size()];
+ line_bottom = new PVector[part_bottom.size()];
+
+ for( int i = 0; i < line_top.length; i++ ){
+ 	line_top[i] = new PVector(0,part_top.get(i));
+ }
+
+ for( int i = 0; i < line_middle.length; i++ ){
+ 	line_middle[i] = new PVector(0,part_middle.get(i));
+ }
+
+ for( int i = 0; i < line_bottom.length; i++ ){
+ 	line_bottom[i] = new PVector(0,part_bottom.get(i));
+ }
+
+
+ pushMatrix();
+ translate(1000, 0);
+ rmap = new Rmap(line_top,con_top,0,cut_point[0]);
+ rmap = new Rmap(line_middle,con_middle,cut_point[0],cut_point[1]);
+ rmap = new Rmap(line_bottom,con_bottom,cut_point[1],cut_point[1]+cut_point[0]);
+ // rmap = new Rmap(part_middle,line_middle,1);
+ // rmap = new Rmap(part_bottom,line_bottom,2);
+ popMatrix();
+
 	border();
 	popMatrix();
 // sklalowanie przesuwanie przestrzenią roboczą [ STOP ]
 	info_top();
 	info_bootom();
 }
+
+
+
+class Rmap{
+
+	PVector out[];
+	PVector line_cor_norm[];
+
+	float omin;
+	float omax;
+
+	Rmap(PVector[] _pos, PVector[] _line_cor, float _old_min, float _old_max ){
+		out = new PVector[_pos.length];
+		line_cor_norm = new PVector[_pos.length];
+
+		omin = _old_min;
+		omax = _old_max;
+
+		for ( int i = 0; i < _pos.length; i++){
+			line_cor_norm[i] = new PVector( map( _pos[i].x, omin, omax, 0, 1), map( _pos[i].y, omin, omax, 0, 1) );
+		}
+
+		for ( int  i = 0; i < _pos.length; i++ ){
+			out[i]	= new PVector( lerp( _line_cor[0].x, _line_cor[1].x, line_cor_norm[i].y), lerp( _line_cor[0].y, _line_cor[1].y, line_cor_norm[i].y ));	
+			ellipse(out[i].x,out[i].y, 5,5);
+		}
+
+	}
+}
+
+
